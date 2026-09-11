@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘 뭐 먹지? | 점심 메뉴 추천</title>
+    <!-- 구글 폰트 적용 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: #2c3e50;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 460px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 1px solid #edf2f7;
+        }
+
+        .title-area h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #2d3436;
+            margin-bottom: 8px;
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        .title-area p {
+            font-size: 0.95rem;
+            color: #636e72;
+            margin-bottom: 30px;
+        }
+
+        .display-area {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            padding: 35px 20px;
+            margin-bottom: 30px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emoji {
+            font-size: 6rem;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+
+        .menu-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 8px;
+            min-height: 2.2rem;
+        }
+
+        .category {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ff7675;
+            background: #ffeaa7;
+            padding: 4px 14px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .btn-recommend {
+            width: 100%;
+            background-color: #ff7675;
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(255, 118, 117, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-recommend:hover {
+            background-color: #d63031;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(214, 48, 49, 0.4);
+        }
+
+        .btn-recommend:active {
+            transform: translateY(1px);
+        }
+
+        .btn-recommend:disabled {
+            background-color: #b2bec3;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 룰렛 회전 애니메이션 효과 */
+        .spinning .emoji {
+            animation: bounce 0.12s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0) scale(0.9); }
+            100% { transform: translateY(-8px) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="title-area">
+            <h1>🍱 오늘 먹을 점심 메뉴</h1>
+            <p>결정장애 해결! 메뉴 추천 버튼을 눌러보세요.</p>
+        </div>
+
+        <div class="display-area" id="displayArea">
+            <div class="emoji" id="emoji">❓</div>
+            <div class="menu-title" id="menuTitle">버튼을 눌러주세요</div>
+            <div class="category" id="category">랜덤 추천기</div>
+        </div>
+
+        <!-- 요구하신 [점심 메뉴 추천] 버튼 -->
+        <button class="btn-recommend" id="recommendBtn" onclick="getLunchMenu()">
+            점심 메뉴 추천
+        </button>
+    </div>
+
+    <script>
+        const lunchList = [
+            { name: "비빔밥", emoji: "🍱", category: "한식" },
+            { name: "김치찌개", emoji: "🍲", category: "한식" },
+            { name: "된장찌개", emoji: "🍲", category: "한식" },
+            { name: "제육볶음", emoji: "🥩", category: "한식" },
+            { name: "삼겹살", emoji: "🥓", category: "한식" },
+            { name: "국밥", emoji: "🥣", category: "한식" },
+            { name: "떡볶이", emoji: "🍢", category: "분식" },
+            { name: "김밥", emoji: "🍙", category: "분식" },
+            { name: "자장면", emoji: "🍜", category: "중식" },
+            { name: "짬뽕", emoji: "🍜", category: "중식" },
+            { name: "탕수육", emoji: "🥢", category: "중식" },
+            { name: "마라탕", emoji: "🥘", category: "중식" },
+            { name: "초밥", emoji: "🍣", category: "일식" },
+            { name: "돈가스", emoji: "🥩", category: "일식" },
+            { name: "라멘", emoji: "🍜", category: "일식" },
+            { name: "우동", emoji: "🍲", category: "일식" },
+            { name: "카레", emoji: "🍛", category: "일식" },
+            { name: "파스타", emoji: "🍝", category: "양식" },
+            { name: "피자", emoji: "🍕", category: "양식" },
+            { name: "햄버거", emoji: "🍔", category: "양식" },
+            { name: "샌드위치", emoji: "🥪", category: "간편식" },
+            { name: "샐러드", emoji: "🥗", category: "건강식" },
+            { name: "쌀국수", emoji: "🍜", category: "아시안" },
+            { name: "타코", emoji: "🌮", category: "멕시칸" }
+        ];
+
+        let isRunning = false;
+
+        function getLunchMenu() {
+            if (isRunning) return;
+
+            isRunning = true;
+            const btn = document.getElementById('recommendBtn');
+            const displayArea = document.getElementById('displayArea');
+            const emojiEl = document.getElementById('emoji');
+            const menuTitleEl = document.getElementById('menuTitle');
+            const categoryEl = document.getElementById('category');
+
+            btn.disabled = true;
+            displayArea.classList.add('spinning');
+
+            let count = 0;
+            const maxCount = 20; // 랜덤 회전 횟수
+
+            const timer = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * lunchList.length);
+                const item = lunchList[randomIndex];
+
+                emojiEl.textContent = item.emoji;
+                menuTitleEl.textContent = item.name;
+                categoryEl.textContent = item.category;
+
+                count++;
+
+                if (count >= maxCount) {
+                    clearInterval(timer);
+                    displayArea.classList.remove('spinning');
+                    
+                    // 최종 선택
+                    const finalIndex = Math.floor(Math.random() * lunchList.length);
+                    const finalItem = lunchList[finalIndex];
+
+                    emojiEl.textContent = finalItem.emoji;
+                    menuTitleEl.textContent = finalItem.name;
+                    categoryEl.textContent = finalItem.category;
+
+                    // 당첨 시 톡 튀어오르는 효과
+                    emojiEl.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        emojiEl.style.transform = 'scale(1)';
+                    }, 200);
+
+                    btn.disabled = false;
+                    isRunning = false;
+                }
+            }, 70);
+        }
+    </script>
+</body>
+</html>
